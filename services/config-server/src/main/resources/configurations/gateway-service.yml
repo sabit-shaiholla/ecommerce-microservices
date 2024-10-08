@@ -25,5 +25,26 @@ spring:
           uri: lb:http://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
+        - id: openapi
+          uri: http://localhost:${server.port}
+          predicates:
+            - Path=/v3/api-docs/**
+          filters:
+            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: customer
+        url: lb:http://PAYMENT-SERVICE/v3/api-docs
+      - name: order
+        url: lb:http://PAYMENT-SERVICE/v3/api-docs
+      - name: product
+        url: lb:http://PAYMENT-SERVICE/v3/api-docs
+      - name: payment
+        url: lb:http://PAYMENT-SERVICE/v3/api-docs
+  api-docs:
+    enabled: true
 server:
   port: 8222

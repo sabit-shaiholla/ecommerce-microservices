@@ -1,60 +1,35 @@
 package com.electroboy.gateway.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.cloud.gateway.route.RouteDefinition;
+import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Electroboy E-Commerce API")
-                        .version("1.0")
-                        .description("API Gateway for E-commerce microservices"));
-    }
+    @Lazy(false)
+    public List<GroupedOpenApi> apis(RouteDefinitionLocator locator) {
+        List<GroupedOpenApi> groups = new ArrayList<>();
+        List<RouteDefinition> definitions = locator.getRouteDefinitions().collectList().block();
 
-    @Bean
-    public GroupedOpenApi customerApi() {
-        return GroupedOpenApi.builder()
-                .group("customer")
-                .pathsToMatch("/api/v1/customers/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi productApi() {
-        return GroupedOpenApi.builder()
-                .group("product")
-                .pathsToMatch("/api/v1/products/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi orderApi() {
-        return GroupedOpenApi.builder()
-                .group("order")
-                .pathsToMatch("/api/v1/orders/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi orderLineApi() {
-        return GroupedOpenApi.builder()
-                .group("order-line")
-                .pathsToMatch("/api/v1/order-lines/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi paymentApi() {
-        return GroupedOpenApi.builder()
-                .group("payment")
-                .pathsToMatch("/api/v1/payments/**")
-                .build();
+        if (definitions != null) {
+            definitions.stream()
+                    .filter(routeDefinition -> routeDefinition.getId().matches(".*-service"))
+                    .forEach(routeDefinition -> {
+                        String name = routeDefinition.getId().replaceAll("-service", "");
+                        groups.add(GroupedOpenApi.builder()
+                                .pathsToMatch("/api/v1/" + name + "s/**")
+                                .group(name)
+                                .build());
+                    });
+        }
+        return groups;
     }
 }
