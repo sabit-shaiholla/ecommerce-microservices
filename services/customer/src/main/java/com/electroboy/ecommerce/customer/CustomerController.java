@@ -1,5 +1,8 @@
 package com.electroboy.ecommerce.customer;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +13,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/customers")
 @RequiredArgsConstructor
+@Tag(name = "Customer Service API", description = "Customer management API")
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @PostMapping
+    @Operation(summary = "Create a new customer", description = "Create a new customer with the provided details")
+    @ApiResponse(responseCode = "200", description = "Customer created successfully")
     public ResponseEntity<String> createCustomer(
             @RequestBody @Valid CustomerRequest request
     ) {
@@ -22,6 +28,8 @@ public class CustomerController {
     }
 
     @PutMapping
+    @Operation(summary = "Update an existing customer", description = "Update an existing customer with the provided details")
+    @ApiResponse(responseCode = "202", description = "Customer updated successfully")
     public ResponseEntity<Void> updateCustomer(
             @RequestBody @Valid CustomerRequest request
     ) {
@@ -30,11 +38,15 @@ public class CustomerController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all customers", description = "Retrieves the list of all customers")
+    @ApiResponse(responseCode = "200", description = "List of customers retrieved successfully")
     public ResponseEntity<List<CustomerResponse>> findAllCustomers() {
         return ResponseEntity.ok(customerService.findAllCustomers());
     }
 
     @GetMapping("/exists/{customer-id}")
+    @Operation(summary = "Check if customer exists", description = "Check if a customer exists with the provided ID")
+    @ApiResponse(responseCode = "200", description = "Customer exists status retrieved successfully")
     public ResponseEntity<Boolean> customerExistsById(
             @PathVariable("customer-id") String customerId
     ) {
@@ -42,6 +54,8 @@ public class CustomerController {
     }
 
     @GetMapping("/{customer-id}")
+    @Operation(summary = "Find customer by ID", description = "Find a customer by the provided ID")
+    @ApiResponse(responseCode = "200", description = "Customer retrieved successfully")
     public ResponseEntity<CustomerResponse> findCustomerById(
             @PathVariable("customer-id") String customerId
     ) {
@@ -49,6 +63,8 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{customer-id}")
+    @Operation(summary = "Delete customer by ID", description = "Delete a customer by the provided ID")
+    @ApiResponse(responseCode = "202", description = "Customer deleted successfully")
     public ResponseEntity<Void> deleteCustomer(
             @PathVariable("customer-id") String customerId
     ) {
